@@ -10,4 +10,6 @@
 
 @protocol AFACAuthorizationDelegate <NSObject>
 
+@property (nonatomic, readonly) NSString *authorizationHeader;
+
 @end

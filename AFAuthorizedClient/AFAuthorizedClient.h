@@ -7,7 +7,10 @@
 //
 
 #import "AFHTTPClient.h"
+#import "AFACAuthorizationDelegate.h"
 
 @interface AFAuthorizedClient : AFHTTPClient
+
+@property (nonatomic, weak) id<AFACAuthorizationDelegate> authorizationDelegate;
 
 @end
