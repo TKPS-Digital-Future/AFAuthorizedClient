@@ -68,7 +68,72 @@ NSInteger const kNoAuthcodeRedirectURIError = 3;
 
 - (void) authenticateWithSuccess:(void (^)(AFOAuthCredential *credential))success failure:(void (^)(NSError *error))failure
 {
-
+    typedef void (^failureBlock)(NSError *);
+    
+    void (^refreshTokenRequest)(failureBlock);
+    void (^usernamePasswordRequest)(failureBlock);
+    void (^authCodeRequest)(failureBlock);
+    void (^implicitRequest)(failureBlock);
+    
+    refreshTokenRequest = ^(failureBlock refreshFailure)
+    {
+        NSString *refreshToken = self.refreshToken?self.refreshToken:((self.afOAuthCredential && self.afOAuthCredential.refreshToken)?self.afOAuthCredential.refreshToken:nil);
+        
+        if (refreshToken) {
+            [self.oauth2Client authenticateUsingOAuthWithPath:self.tokenEndpoint refreshToken:refreshToken success:success failure:refreshFailure];
+        }
+        else
+        {
+            NSError *noRefreshTokenError = [NSError errorWithDomain:kAFAuthorizedClientErrorDomain code:kNoRefreshTokenError userInfo:nil];
+            refreshFailure(noRefreshTokenError);
+        }
+    };
+    
+    usernamePasswordRequest = ^(failureBlock upFailure)
+    {
+        if (self.username && self.password) {
+            [self.oauth2Client authenticateUsingOAuthWithPath:self.tokenEndpoint username:self.username password:self.password scope:self.scope success:success failure:upFailure];
+        }
+        else
+        {
+            NSError *noUsernamePasswordError = [NSError errorWithDomain:kAFAuthorizedClientErrorDomain code:kNoUsernamePasswordError userInfo:nil];
+            upFailure(noUsernamePasswordError);
+        }
+    };
+    
+    authCodeRequest = ^(failureBlock acFailure)
+    {
+        if (self.authCode && self.redirectURI) {
+            [self.oauth2Client authenticateUsingOAuthWithPath:self.tokenEndpoint code:self.authCode redirectURI:self.redirectURI success:success failure:acFailure];
+        }
+        else
+        {
+            NSError *noAuthcodeRedirectURIError = [NSError errorWithDomain:kAFAuthorizedClientErrorDomain code:kNoAuthcodeRedirectURIError userInfo:nil];
+            acFailure(noAuthcodeRedirectURIError);
+        }
+    };
+    
+    implicitRequest = ^(failureBlock impFailure)
+    {
+        [self.oauth2Client authenticateUsingOAuthWithPath:self.tokenEndpoint scope:self.scope success:success failure:impFailure];
+    };
+    
+    failureBlock acFailure = ^(NSError *error)
+    {
+        implicitRequest(failure);
+    };
+    
+    failureBlock upFailure = ^(NSError *error)
+    {
+        authCodeRequest(acFailure);
+    };
+    
+    failureBlock refreshFailure = ^(NSError *error)
+    {
+        usernamePasswordRequest(upFailure);
+    };
+    
+    refreshTokenRequest(refreshFailure);
 }
 
 - (NSString *) authorizationHeader
