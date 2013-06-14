@@ -10,6 +10,6 @@
 
 @interface AFACBasicAuthorizationDelegate : NSObject <AFACAuthorizationDelegate>
 
-- (void) setCredentialsWithUsername:(NSString *) password:(NSString *);
+- (void) setCredentialsWithUsername:(NSString *) username password:(NSString *) password;
 
 @end
