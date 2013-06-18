@@ -154,6 +154,9 @@ NSInteger const kNoAuthcodeRedirectURIError = 3;
 
 - (NSString *) authorizationHeader
 {
+    // TODO: if several parallel requests fail at the same time, don't refresh the token for each of them.
+    // CONSIDER: put the handling of parallel fails into the client.
+    
     __block BOOL isFinished = NO;
     
     [self authenticateWithSuccess:^(AFOAuthCredential *credential) {
