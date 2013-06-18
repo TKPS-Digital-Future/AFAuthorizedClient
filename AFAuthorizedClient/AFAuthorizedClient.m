@@ -90,7 +90,7 @@
             mutableRequest.allHTTPHeaderFields = headers;
             
             // Enqueue the updated request again. Use original failure-block, so it will be called directly if authorization fails again.
-            AFHTTPRequestOperation *retryOperation = [self HTTPRequestOperationWithRequest:mutableRequest success:success failure:failure];
+            AFHTTPRequestOperation *retryOperation = [super HTTPRequestOperationWithRequest:mutableRequest success:success failure:failure];
             [self enqueueHTTPRequestOperation:retryOperation];
         }
         // Error not related to authorization
