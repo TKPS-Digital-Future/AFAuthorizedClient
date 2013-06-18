@@ -154,17 +154,22 @@ NSInteger const kNoAuthcodeRedirectURIError = 3;
 
 - (NSString *) authorizationHeader
 {
-    dispatch_semaphore_t sema = dispatch_semaphore_create(0);
+    __block BOOL isFinished = NO;
     
     [self authenticateWithSuccess:^(AFOAuthCredential *credential) {
         self.afOAuthCredential = credential;
-        dispatch_semaphore_signal(sema);
+        isFinished = YES;
     } failure:^(NSError *error) {
         NSLog(@"error getting token: %@", error);
-        dispatch_semaphore_signal(sema);
+        isFinished = YES;
     }];
     
-    dispatch_semaphore_wait(sema, DISPATCH_TIME_FOREVER);
+    NSDate *loopLimit = [NSDate dateWithTimeIntervalSinceNow:10];
+    while (!isFinished && [loopLimit timeIntervalSinceNow] > 0)
+    {
+        [[NSRunLoop currentRunLoop] runMode:NSDefaultRunLoopMode beforeDate:loopLimit];
+        loopLimit = [NSDate dateWithTimeIntervalSinceNow:10];
+    }
     
     return [NSString stringWithFormat:@"Bearer %@", self.afOAuthCredential.accessToken];
 }
