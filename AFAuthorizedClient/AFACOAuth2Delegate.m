@@ -154,6 +154,18 @@ NSInteger const kNoAuthcodeRedirectURIError = 3;
 
 - (NSString *) authorizationHeader
 {
+    dispatch_semaphore_t sema = dispatch_semaphore_create(0);
+    
+    [self authenticateWithSuccess:^(AFOAuthCredential *credential) {
+        self.afOAuthCredential = credential;
+        dispatch_semaphore_signal(sema);
+    } failure:^(NSError *error) {
+        NSLog(@"error getting token: %@", error);
+        dispatch_semaphore_signal(sema);
+    }];
+    
+    dispatch_semaphore_wait(sema, DISPATCH_TIME_FOREVER);
+    
     return [NSString stringWithFormat:@"Bearer %@", self.afOAuthCredential.accessToken];
 }
 
