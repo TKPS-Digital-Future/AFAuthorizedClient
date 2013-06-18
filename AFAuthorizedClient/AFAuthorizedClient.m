@@ -79,19 +79,23 @@
         // In case we decided that authorization is required above
         if (authorizationFailed)
         {
-            // Create a mutable copy of the request
-            NSMutableURLRequest *mutableRequest = urlRequest.mutableCopy;
-            
-            // Update the authorization-header-field with the value from the delegate
-            NSMutableDictionary *headers = mutableRequest.allHTTPHeaderFields.mutableCopy;
-            [headers setValue:self.authorizationDelegate.authorizationHeader forKey:@"Authorization"];
-            
-            // Update the header-fields of the original request
-            mutableRequest.allHTTPHeaderFields = headers;
-            
-            // Enqueue the updated request again. Use original failure-block, so it will be called directly if authorization fails again.
-            AFHTTPRequestOperation *retryOperation = [super HTTPRequestOperationWithRequest:mutableRequest success:success failure:failure];
-            [self enqueueHTTPRequestOperation:retryOperation];
+            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0), ^{
+                // Create a mutable copy of the request
+                NSMutableURLRequest *mutableRequest = urlRequest.mutableCopy;
+                
+                // Update the authorization-header-field with the value from the delegate
+                NSMutableDictionary *headers = mutableRequest.allHTTPHeaderFields.mutableCopy;
+                [headers setValue:self.authorizationDelegate.authorizationHeader forKey:@"Authorization"];
+                
+                // Update the header-fields of the original request
+                mutableRequest.allHTTPHeaderFields = headers;
+                
+                // Enqueue the updated request again. Use original failure-block, so it will be called directly if authorization fails again.
+                AFHTTPRequestOperation *retryOperation = [super HTTPRequestOperationWithRequest:mutableRequest success:success failure:failure];
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    [self enqueueHTTPRequestOperation:retryOperation];
+                });
+            });
         }
         // Error not related to authorization
         else
