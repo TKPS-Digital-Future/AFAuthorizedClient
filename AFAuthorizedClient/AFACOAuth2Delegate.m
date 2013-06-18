@@ -157,4 +157,13 @@ NSInteger const kNoAuthcodeRedirectURIError = 3;
     return [NSString stringWithFormat:@"Bearer %@", self.afOAuthCredential.accessToken];
 }
 
+- (void) clearCredentials
+{
+    self.username = nil;
+    self.password = nil;
+    self.afOAuthCredential = nil;
+    self.refreshToken = nil;
+    self.authCode = nil;
+}
+
 @end

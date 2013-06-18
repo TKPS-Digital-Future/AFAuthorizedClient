@@ -57,4 +57,10 @@ static NSString * AFBase64EncodedStringFromString(NSString *string) {
     return [NSString stringWithFormat:@"Basic %@", AFBase64EncodedStringFromString(basicAuthCredentials)];
 }
 
+- (void) clearCredentials
+{
+    self.username = nil;
+    self.password = nil;
+}
+
 @end
