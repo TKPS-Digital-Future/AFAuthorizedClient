@@ -11,6 +11,6 @@
 
 @interface AFAuthorizedClient : AFHTTPClient
 
-@property (nonatomic, weak) id<AFACAuthorizationDelegate> authorizationDelegate;
+@property (nonatomic, strong) id<AFACAuthorizationDelegate> authorizationDelegate;
 
 @end

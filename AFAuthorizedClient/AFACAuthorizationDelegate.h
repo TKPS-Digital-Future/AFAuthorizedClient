@@ -12,4 +12,6 @@
 
 @property (nonatomic, readonly) NSString *authorizationHeader;
 
+- (void) clearCredentials;
+
 @end
