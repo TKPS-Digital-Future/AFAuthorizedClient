@@ -11,6 +11,12 @@
 
 @implementation AFAuthorizedClient
 
+- (void) clearAuthorizationHeader
+{
+    [self.authorizationDelegate clearCredentials];
+    [super clearAuthorizationHeader];
+}
+
 // Adds a custom failure-block that will handle request which need to be authenticated
 - (AFHTTPRequestOperation *)HTTPRequestOperationWithRequest:(NSURLRequest *)urlRequest
                                                     success:(void (^)(AFHTTPRequestOperation *, id))success
@@ -98,4 +104,5 @@
     // Add new failure-block to the request and return it
     return [super HTTPRequestOperationWithRequest:urlRequest success:success failure:authorizationFailure];
 }
+
 @end
