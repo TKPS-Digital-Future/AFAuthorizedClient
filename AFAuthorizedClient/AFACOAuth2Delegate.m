@@ -157,22 +157,17 @@ NSInteger const kNoAuthcodeRedirectURIError = 3;
     // TODO: if several parallel requests fail at the same time, don't refresh the token for each of them.
     // CONSIDER: put the handling of parallel fails into the client.
     
-    __block BOOL isFinished = NO;
+    dispatch_semaphore_t sema = dispatch_semaphore_create(0);
     
     [self authenticateWithSuccess:^(AFOAuthCredential *credential) {
         self.afOAuthCredential = credential;
-        isFinished = YES;
+        dispatch_semaphore_signal(sema);
     } failure:^(NSError *error) {
         NSLog(@"error getting token: %@", error);
-        isFinished = YES;
+        dispatch_semaphore_signal(sema);
     }];
     
-    NSDate *loopLimit = [NSDate dateWithTimeIntervalSinceNow:10];
-    while (!isFinished && [loopLimit timeIntervalSinceNow] > 0)
-    {
-        [[NSRunLoop currentRunLoop] runMode:NSDefaultRunLoopMode beforeDate:loopLimit];
-        loopLimit = [NSDate dateWithTimeIntervalSinceNow:10];
-    }
+    dispatch_semaphore_wait(sema, DISPATCH_TIME_FOREVER);
     
     return [NSString stringWithFormat:@"Bearer %@", self.afOAuthCredential.accessToken];
 }
