@@ -85,7 +85,10 @@
                 
                 // Update the authorization-header-field with the value from the delegate
                 NSMutableDictionary *headers = mutableRequest.allHTTPHeaderFields.mutableCopy;
-                [headers setValue:self.authorizationDelegate.authorizationHeader forKey:@"Authorization"];
+                NSString *authHeader = self.authorizationDelegate.authorizationHeader;
+                [headers setValue:authHeader forKey:@"Authorization"];
+                // Update default headers
+                [self setDefaultHeader:@"Authorization" value:authHeader];
                 
                 // Update the header-fields of the original request
                 mutableRequest.allHTTPHeaderFields = headers;
