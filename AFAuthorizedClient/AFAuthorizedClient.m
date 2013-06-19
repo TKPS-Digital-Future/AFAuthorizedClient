@@ -45,6 +45,7 @@
             // Something else went wrong or NSURLConnection misinterpreted the server-response
             // Effect: investigate the HTTP-response
             case NSURLErrorUnknown:
+            case NSURLErrorBadServerResponse:
             default:
             {
                 investigateHTTP = YES;
